@@ -35,7 +35,7 @@ def calculator():
             else:
                 print("Invalid operation. Please choose from '+', '-', '*', or '/'.")
             
-            break 
+            break
         except ValueError:
             print("Invalid input! Please enter numeric values.")
         except Exception as e:
