@@ -7,6 +7,11 @@
 
 # სტუდენტური კლასი შემდეგი ატრიბუტებით:
 # Name Name (string) - სახელი, Roll Number (int) - სიის ნომერი, Grade (char) - შეფასება. 
+import csv
+import os
+
+file_path = "students.csv"
+
 class Student:
     def __init__(self, name, roll_number, grade):
         self.name = name
@@ -16,19 +21,48 @@ class Student:
 class StudentManagementSystem:
     def __init__(self):
         self.students = []
+# არსებული სტუდენტების ჩატვირთვა
+        self.load_students_from_csv()
+    def load_students_from_csv(self):
+        """Load students from CSV file."""
+        if not os.path.exists(file_path):
+            # Create the CSV file if it doesn't exist
+            with open(file_path, mode='w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow(["Name", "Roll Number", "Grade"])
+                
+        # არსებული სტუდენტების წაკითხვა CSV ფაილიდან
+        with open(file_path, mode='r', newline='') as file:
+            reader = csv.reader(file)
+            next(reader)  # Skip header row
+            for row in reader:
+                name, roll_number, grade = row
+                self.students.append(Student(name, int(roll_number), grade))
+
+    def save_students_to_csv(self):
+        """Save students to CSV file."""
+        with open(file_path, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Name", "Roll Number", "Grade"])
+            for student in self.students:
+                writer.writerow([student.name, student.roll_number, student.grade])
 
 # მენიუს სისტემა: ჩვენება შემდეგი პარამეტრებით: 
 # o ახალი სტუდენტის დამატება
     def add_new_student(self, name, roll_number, grade):
         """Add a new student to the system."""
-        while True:
+        if grade.upper() not in ['A', 'B', 'C', 'D', 'E', 'F']:
+            print("Error: Grade should be A, B, C, D, E, or F.")
+            return
             if roll_number <= 0:
                 print("Roll number should be a positive whole number.")
                 roll_number = int(input("Reenter roll number: "))
-            else:
-                break
-        new_student = Student(name, roll_number, grade)
+            return
+            
+        new_student = Student(name, roll_number, grade.upper())
         self.students.append(new_student)
+        self.save_students_to_csv()
+        print("Student added successfully.")
 
 # o ყველა სტუდენტის ნახვა
     def view_all_students(self):
@@ -57,6 +91,7 @@ class StudentManagementSystem:
         for student in self.students:
             if student.roll_number == roll_number:
                 student.grade = new_grade
+                self.save_students_to_csv()
                 print("Grade updated successfully.")
                 break
         else:
@@ -92,9 +127,6 @@ def main():
             roll_number = int(roll_number_input)
             
             grade_input = input("Enter student's grade: ")
-            if not grade_input.isdigit():
-                print("Error: Grade should contain only numbers.")
-                continue 
             grade = grade_input
             
             sms.add_student(name, roll_number, grade)
@@ -121,9 +153,6 @@ def main():
             roll_number = int(roll_number_input)
             
             new_grade_input = input("Enter new grade: ")
-            if not new_grade_input.isdigit():
-                print("Grade should contain only numbers.")
-                continue  
             new_grade = new_grade_input
             
             sms.update_student_grade(roll_number, new_grade)
